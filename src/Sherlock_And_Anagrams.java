@@ -11,17 +11,24 @@ public class Sherlock_And_Anagrams {
     // Complete the sherlockAndAnagrams function below.
     static int sherlockAndAnagrams(String s) {
         int size = s.length();
-        for (int i = 1; i<size ; i++){
-            String part = s.substring(0 , i);
-            char[] partCharArr = part.toCharArray();
-            char[] anagramCharArr = new char[partCharArr.length];
-            for (int j = 0 ; j < partCharArr.length ; j++){
-                anagramCharArr[j] = partCharArr[partCharArr.length - j - 1];
+        int sum = 0;
+        for (int i = 0; i<size ; i++){
+            for (int j = i+1 ; j <= size ; j++){
+                String part = s.substring(i , j);
+                char[] partCharArr = part.toCharArray();
+                Arrays.sort(partCharArr);
+                for(int k = 0 ; k<size ; k++){
+                    if(i==k)
+                        continue;
+                    String anagram = s.substring(k , Math.min(k+part.length() , size));
+                    char[] anagramCharArr = anagram.toCharArray();
+                    Arrays.sort(anagramCharArr);
+                    if(Arrays.equals(partCharArr, anagramCharArr))
+                        sum++;
+                }
             }
-            String anagram = new String(anagramCharArr);
-            System.out.println(part + ":" + anagram);
         }
-        return 0;
+        return sum/2;
     }
 
     private static final Scanner scanner = new Scanner(System.in);

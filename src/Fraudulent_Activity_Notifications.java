@@ -1,10 +1,8 @@
-import java.io.*;
-import java.math.*;
-import java.security.*;
-import java.text.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.regex.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class Fraudulent_Activity_Notifications {
 
@@ -15,28 +13,29 @@ public class Fraudulent_Activity_Notifications {
             return 0;
 
         int[] trailingDaysExpenditure = new int[d];
+        int[] medianArr = new int[d];
         int notiCnt = 0;
         int trailIdx;
-        for (int i = 0 ; i < d ; i++) {
+        for (int i = 0; i < d; i++) {
             trailingDaysExpenditure[i] = expenditure[i];
+            medianArr[i] = expenditure[i];
         }
+        Arrays.sort(medianArr);
 
-        if (d % 2 == 0){
-            for (int i = d ; i<expenditure.length ; i++){
-                int[] medianArr = trailingDaysExpenditure.clone();
-                Arrays.sort(medianArr);
-                if (expenditure[i] >= (medianArr[d/2] + medianArr[d/2-1]))
+        if (d % 2 == 0) {
+            for (int i = d; i < expenditure.length; i++) {
+                if (expenditure[i] >= (medianArr[d / 2] + medianArr[d / 2 - 1]))
                     notiCnt++;
-                trailIdx = i%d;
+                trailIdx = i % d;
+                removeAndAdd(medianArr, trailingDaysExpenditure[trailIdx], expenditure[i]);
                 trailingDaysExpenditure[trailIdx] = expenditure[i];
             }
-        }else {
-            for (int i = d ; i<expenditure.length ; i++){
-                int[] medianArr = trailingDaysExpenditure.clone();
-                Arrays.sort(medianArr);
-                if (expenditure[i] >= medianArr[d/2]*2)
+        } else {
+            for (int i = d; i < expenditure.length; i++) {
+                if (expenditure[i] >= medianArr[d / 2] * 2)
                     notiCnt++;
-                trailIdx = i%d;
+                trailIdx = i % d;
+                removeAndAdd(medianArr, trailingDaysExpenditure[trailIdx], expenditure[i]);
                 trailingDaysExpenditure[trailIdx] = expenditure[i];
             }
         }
@@ -44,10 +43,35 @@ public class Fraudulent_Activity_Notifications {
         return notiCnt;
     }
 
+    private static void removeAndAdd(int[] medianArr, int remove, int add) {
+        int removeInflection = 0;
+        for (; removeInflection < medianArr.length; removeInflection++)
+            if (medianArr[removeInflection] == remove)
+                break;
+
+        int addInflection = 0;
+        for (; addInflection < medianArr.length; addInflection++)
+            if (add < medianArr[addInflection])
+                break;
+
+        if (addInflection <= removeInflection) {
+            for (int i = removeInflection; i > addInflection; i--) {
+                medianArr[i] = medianArr[i - 1];
+            }
+            medianArr[addInflection] = add;
+        } else {
+            for (int i = removeInflection; i < addInflection - 1; i++) {
+                medianArr[i] = medianArr[i + 1];
+            }
+            medianArr[addInflection - 1] = add;
+        }
+
+    }
+
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) throws IOException {
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(System.getenv("OUTPUT_PATH")));
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("activityNotifications"));
 
         String[] nd = scanner.nextLine().split(" ");
 
